@@ -52,7 +52,6 @@ type User struct {
 type Memo struct {
 	Id        int
 	User      int
-	username  string
 	Content   string
 	IsPrivate int
 	CreatedAt string
@@ -302,17 +301,15 @@ func recentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	rows.Close()
 
-	// 変えたい
-	rows, err = dbConn.Query("SELECT memos.id,memos.user,memos.content,memos.is_private,memos.created_at,memos.updated_at,username FROM memos INNER JOIN users ON  memos.user = users.id WHERE is_private = 0 ORDER BY memos.created_at DESC,memos.id DESC LIMIT ? OFFSET ?", memosPerPage, memosPerPage*page)
+	rows, err = dbConn.Query("SELECT memos.id, user, content, is_private, memos.created_at, memos.updated_at, username FROM memos INNER JOIN users ON memos.user = users.id WHERE is_private=0 ORDER BY created_at DESC, id DESC LIMIT ?", memosPerPage)
 	if err != nil {
 		serverError(w, err)
 		return
 	}
 	memos := make(Memos, 0)
-	// 撮ってきたmemoに対してfor回してる
 	for rows.Next() {
 		memo := Memo{}
-		rows.Scan(&memo.Id, &memo.User, &memo.Content, &memo.IsPrivate, &memo.CreatedAt, &memo.UpdatedAt, &memo.username)
+		rows.Scan(&memo.Id, &memo.User, &memo.Content, &memo.IsPrivate, &memo.CreatedAt, &memo.UpdatedAt, &memo.Username)
 	}
 	if len(memos) == 0 {
 		notFound(w)
