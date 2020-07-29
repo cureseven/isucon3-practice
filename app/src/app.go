@@ -1,14 +1,10 @@
 package main
 
 import (
-	"github.com/gorilla/sessions"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
-	"github.com/gorilla/securecookie"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -22,13 +18,13 @@ import (
 )
 
 const (
-	memosPerPage       = 100
-	listenAddr         = ":5000"
-	sessionName        = "isucon_session"
-	tmpDir             = "/tmp/"
-	markdownCommand    = "../bin/markdown"
-	dbConnPoolSize     = 10
-	sessionSecret      = "kH<{11qpic*gf0e21YK7YtwyUvE9l<1r>yX8R-Op"
+	memosPerPage    = 100
+	listenAddr      = ":5000"
+	sessionName     = "isucon_session"
+	tmpDir          = "/tmp/"
+	markdownCommand = "../bin/markdown"
+	dbConnPoolSize  = 10
+	sessionSecret   = "kH<{11qpic*gf0e21YK7YtwyUvE9l<1r>yX8R-Op"
 )
 
 type Config struct {
@@ -301,6 +297,7 @@ func recentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	rows.Close()
 
+	// 変えたい
 	rows, err = dbConn.Query("SELECT * FROM memos WHERE is_private=0 ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?", memosPerPage, memosPerPage*page)
 	if err != nil {
 		serverError(w, err)
@@ -313,9 +310,11 @@ func recentHandler(w http.ResponseWriter, r *http.Request) {
 		serverError(w, err)
 		return
 	}
+	// 撮ってきたmemoに対してfor回してる
 	for rows.Next() {
 		memo := Memo{}
 		rows.Scan(&memo.Id, &memo.User, &memo.Content, &memo.IsPrivate, &memo.CreatedAt, &memo.UpdatedAt)
+		// forの中で１行だけ取得するクエリ叩いてる
 		stmtUser.QueryRow(memo.User).Scan(&memo.Username)
 		memos = append(memos, &memo)
 	}
