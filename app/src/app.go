@@ -228,7 +228,7 @@ func topHandler(w http.ResponseWriter, r *http.Request) {
 	user := getUser(w, r, dbConn, session)
 
 	var totalCount int
-	rows, err := dbConn.Query("SELECT count(*) AS c FROM memos WHERE is_private=0")
+	rows, err := dbConn.Query("SELECT cnt FROM public_count")
 	if err != nil {
 		serverError(w, err)
 		return
@@ -566,6 +566,11 @@ func memoPostHandler(w http.ResponseWriter, r *http.Request) {
 		isPrivate = 1
 	} else {
 		isPrivate = 0
+		_, err := dbConn.Exec("UPDATE public_count SET cnt = cnt + 1")
+		if err != nil {
+			serverError(w, err)
+			return
+		}
 	}
 	result, err := dbConn.Exec(
 		"INSERT INTO memos (user, content, is_private, created_at) VALUES (?, ?, ?, now())",
