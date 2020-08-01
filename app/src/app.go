@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
